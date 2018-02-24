@@ -19,6 +19,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.nav_header_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -32,6 +33,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onStart()
         val currentUser = mAuth?.currentUser
         updateUI(currentUser)
+        //updateDrawerUI(currentUser)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(requestCode == RC_SIGN_IN) {
+            val response = IdpResponse.fromResultIntent(data)
+
+            if(resultCode == Activity.RESULT_OK) {
+                val user = FirebaseAuth.getInstance().currentUser
+
+                this.updateUI(user)
+            }
+            else {
+                this.updateUI(null)
+            }
+        }
     }
 
 
@@ -56,6 +75,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             textUserEMail.text = ""
             textUserID.text = ""
             imageProfile.setImageResource(R.drawable.common_google_signin_btn_text_disabled)
+        }
+    }
+
+    public fun updateDrawerUI(currentUser: FirebaseUser?){
+        mUser = currentUser
+
+        if(currentUser != null){
+            drawerUserName.text = currentUser?.displayName
+            drawerUserEMail.text = currentUser?.email
+
+
+        }
+        else{
+            drawerUserName.text = "NOT LOGGED IN"
+            drawerUserEMail.text = ""
+            imageView.setImageResource(R.drawable.ic_launcher_background)
         }
     }
 
@@ -111,23 +146,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if(requestCode == RC_SIGN_IN) {
-            val response = IdpResponse.fromResultIntent(data)
-
-            if(resultCode == Activity.RESULT_OK) {
-                val user = FirebaseAuth.getInstance().currentUser
-
-                this.updateUI(user)
-            }
-            else {
-                this.updateUI(null)
-            }
-        }
     }
 
     override fun onBackPressed() {
